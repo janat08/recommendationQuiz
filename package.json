@@ -1,0 +1,28 @@
+{
+  "name": "recommendationquiz",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npm run start:s && start:c",
+    "start:s": "nodemon server/index.js",
+    "start:c": "parcel client/index.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/janat08/recommendationQuiz.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/janat08/recommendationQuiz/issues"
+  },
+  "homepage": "https://github.com/janat08/recommendationQuiz#readme",
+  "dependencies": {
+    "arangojs": "^6.12.0",
+    "express": "^4.17.1",
+    "nodemon": "^2.0.1",
+    "parcel-bundler": "^1.12.4"
+  }
+}

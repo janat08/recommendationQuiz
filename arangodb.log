@@ -1,0 +1,7 @@
+2019-11-25T05:48:49Z |INFO| Starting arangodb version 0.14.12, build bbe2973 component=arangodb
+2019-11-25T05:48:49Z |INFO| Using storage engine 'rocksdb' component=arangodb
+2019-11-25T05:48:49Z |INFO| Serving as master with ID 'dbfc3bdf' on :8528... component=arangodb
+2019-11-25T05:48:49Z |INFO| Waiting for 3 servers to show up.
+ component=arangodb
+2019-11-25T05:48:49Z |INFO| Use the following commands to start other servers: component=arangodb
+2019-11-25T05:48:49Z |INFO| ArangoDB Starter listening on 0.0.0.0:8528 (:8528) component=arangodb
