@@ -20,9 +20,19 @@
   },
   "homepage": "https://github.com/janat08/recommendationQuiz#readme",
   "dependencies": {
+    "@babel/plugin-proposal-decorators": "^7.7.4",
     "arangojs": "^6.12.0",
     "express": "^4.17.1",
+    "mobx": "^5.15.0",
+    "mobx-react": "^6.1.4",
+    "mobx-react-lite": "^1.5.1",
+    "nervjs": "^1.5.5",
     "nodemon": "^2.0.1",
-    "parcel-bundler": "^1.12.4"
+    "parcel-bundler": "^1.12.4",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.7.4"
   }
 }
