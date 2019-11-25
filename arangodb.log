@@ -5,3 +5,24 @@
  component=arangodb
 2019-11-25T05:48:49Z |INFO| Use the following commands to start other servers: component=arangodb
 2019-11-25T05:48:49Z |INFO| ArangoDB Starter listening on 0.0.0.0:8528 (:8528) component=arangodb
+2019-11-25T06:42:04Z |INFO| Starting arangodb version 0.14.12, build bbe2973 component=arangodb
+2019-11-25T06:42:04Z |INFO| Using storage engine 'rocksdb' component=arangodb
+2019-11-25T06:42:04Z |INFO| Serving as master with ID 'c9d68878' on :8528... component=arangodb
+2019-11-25T06:42:04Z |INFO| Waiting for 3 servers to show up.
+ component=arangodb
+2019-11-25T06:42:04Z |INFO| Use the following commands to start other servers: component=arangodb
+2019-11-25T06:42:04Z |INFO| ArangoDB Starter listening on 0.0.0.0:8528 (:8528) component=arangodb
+2019-11-25T06:43:15Z |INFO| Starting arangodb version 0.14.12, build bbe2973 component=arangodb
+2019-11-25T06:43:15Z |INFO| Using storage engine 'rocksdb' component=arangodb
+2019-11-25T06:43:15Z |INFO| Serving as master with ID 'cf6e5ccf' on :8528... component=arangodb
+2019-11-25T06:43:15Z |INFO| ArangoDB Starter listening on 0.0.0.0:8528 (:8528) component=arangodb
+2019-11-25T06:43:15Z |INFO| Waiting for 3 servers to show up.
+ component=arangodb
+2019-11-25T06:43:15Z |INFO| Use the following commands to start other servers: component=arangodb
+2019-11-25T06:47:41Z |INFO| Starting arangodb version 0.14.12, build bbe2973 component=arangodb
+2019-11-25T06:47:41Z |INFO| Using storage engine 'rocksdb' component=arangodb
+2019-11-25T06:47:41Z |INFO| Serving as master with ID '604d6732' on :8528... component=arangodb
+2019-11-25T06:47:41Z |INFO| ArangoDB Starter listening on 0.0.0.0:8528 (:8528) component=arangodb
+2019-11-25T06:47:41Z |INFO| Waiting for 3 servers to show up.
+ component=arangodb
+2019-11-25T06:47:41Z |INFO| Use the following commands to start other servers: component=arangodb
