@@ -3,9 +3,14 @@ const db = dba.db
 const merge = require('deepmerge')
 var aql = require('arangojs').aql;
 
-function getAllQ (){
-    return db.query(`
-FOR q IN questions 
+function getAllQ (questionsList){
+    let directSearch = true
+    if (typeof questionsList != "undefined"){
+        directSearch = false
+    }
+    return db.query(aql`
+    // LET questionsList = ${directSearch}? questions : ${questionsList}
+    FOR q IN  ${directSearch}? questions : ${questionsList} 
     SORT RAND()
     LET answers = (FOR a, o IN OUTBOUND q options
         RETURN MERGE(KEEP(a, "key", "value", "_id"), KEEP(o, 'right'))

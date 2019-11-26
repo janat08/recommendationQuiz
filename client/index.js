@@ -11,7 +11,7 @@ import axios from 'axios'
 //   timeout: 1000,
 // });
 const api = axios.create({
-  baseURL: 'https://5000-eb57867e-a92e-4e43-8e30-e81091be5ca0.ws-ap01.gitpod.io/',
+  baseURL: 'https://2837e08ce73d4a049684366fca45d198.vfs.cloud9.ap-southeast-1.amazonaws.com:8081/',
   timeout: 1000,
 });
 api.get('/api/v1/questions').then(x=>{lg(123, x)})
@@ -36,34 +36,34 @@ export const useStore = () => {
 }
 
 const questions = [
-    {
-        "Topic": "CNN",
-        "QN": "Which of the following statements is true when you use 1×1 convolutions in a CNN?",
-        answers: [{ key: "A", value: "It can help in dimensionality reduction" },
-        { key: "B", value: "It can be used for feature pooling" },
-        { key: "C", value: "It suffers less overfitting due to small kernel size" },
-        { key: "D", value: "All of the above", }],
-        "Solution": "D",
-        "Difficulty": "3"
-    }, {
-        "Topic": "CNN",
-        "QN": "a of the following statements is true when you use 1×1 convolutions in a CNN?",
-        answers: [{ key: "A", value: "It can help in dimensionality reduction" },
-        { key: "B", value: "It can be used for feature pooling" },
-        { key: "C", value: "It suffers less overfitting due to small kernel size" },
-        { key: "D", value: "All of the above", }],
-        "Solution": "D",
-        "Difficulty": "3"
-    }, {
-        "Topic": "ABC",
-        "QN": "s of the following statements is true when you use 1×1 convolutions in a CNN?",
-        answers: [{ key: "A", value: "It can help in dimensionality reduction" },
-        { key: "B", value: "It can be used for feature pooling" },
-        { key: "C", value: "It suffers less overfitting due to small kernel size" },
-        { key: "D", value: "All of the above", }],
-        "Solution": "D",
-        "Difficulty": "3"
-    },
+    // {
+    //     "Topic": "CNN",
+    //     "QN": "Which of the following statements is true when you use 1×1 convolutions in a CNN?",
+    //     answers: [{ key: "A", value: "It can help in dimensionality reduction" },
+    //     { key: "B", value: "It can be used for feature pooling" },
+    //     { key: "C", value: "It suffers less overfitting due to small kernel size" },
+    //     { key: "D", value: "All of the above", }],
+    //     "Solution": "D",
+    //     "Difficulty": "3"
+    // }, {
+    //     "Topic": "CNN",
+    //     "QN": "a of the following statements is true when you use 1×1 convolutions in a CNN?",
+    //     answers: [{ key: "A", value: "It can help in dimensionality reduction" },
+    //     { key: "B", value: "It can be used for feature pooling" },
+    //     { key: "C", value: "It suffers less overfitting due to small kernel size" },
+    //     { key: "D", value: "All of the above", }],
+    //     "Solution": "D",
+    //     "Difficulty": "3"
+    // }, {
+    //     "Topic": "ABC",
+    //     "QN": "s of the following statements is true when you use 1×1 convolutions in a CNN?",
+    //     answers: [{ key: "A", value: "It can help in dimensionality reduction" },
+    //     { key: "B", value: "It can be used for feature pooling" },
+    //     { key: "C", value: "It suffers less overfitting due to small kernel size" },
+    //     { key: "D", value: "All of the above", }],
+    //     "Solution": "D",
+    //     "Difficulty": "3"
+    // },
 ]
 
 
@@ -124,6 +124,12 @@ function createStore() {
         },
         login() {
             //http
+            if (!this.loginStatus){
+                api.post(this.name).then(x=>{
+                    console.log(x)
+                })
+            }
+            
             this.loginStatus = !this.loginStatus
         },
         questions: formatQuestions(questions),

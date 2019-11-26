@@ -168,11 +168,16 @@ function submit({ name, data }) {
 function fetchQuestions(user) {
     return db.query(aql `
     LET u = ${user}
-    FOR a, o, p IN 2..2 OUTBOUND u selections, INBOUND options
-    
-    RETURN {u: KEEP(u, 'name', '_id'), p}
+    FOR a, s IN OUTBOUND u selections
+        FILTER s.complete == false
+        FOR q IN INBOUND a options
+        RETURN q
+    RETURN q
     `)
-        .then(x => x.all())
+    .then(x => x.all())
+    .then(x=>{
+        return getAllQ(x)
+    })
 
 }
 
@@ -183,7 +188,7 @@ function login({ name }) {
     UPDATE {name: ${name}} in users
     RETURN NEW
     `)
-        .then(x => x.all())
+        .then(x => x.all()[0])
         .then(x => {
             return fetchQuestions(x).then(y => {
                 return { user: x, questions: y }
