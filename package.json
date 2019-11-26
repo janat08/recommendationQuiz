@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npm run start:s && start:c",
     "start:s": "nodemon server/index.js",
-    "start:c": "parcel client/index.html"
+    "start:c": "parcel client/index.html --hmr-port 3005"
   },
   "repository": {
     "type": "git",
@@ -30,6 +30,7 @@
     "nervjs": "^1.5.5",
     "nodemon": "^2.0.1",
     "parcel-bundler": "^1.12.4",
+    "ramda": "^0.26.1",
     "react": "^16.12.0",
     "react-dom": "^16.12.0"
   },
