@@ -2,8 +2,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 var cors = require('cors')
 
-const questionsController = require('./questions.js')
-// require('./db.js')
+const qm = require('./questions.js')
+const um = require('./user.js')
+require('./db.js')
 
 
 const app = express();
@@ -15,19 +16,22 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 var base = express.Router()
 app.use('/api/v1', base)
-
+ 
 // var questionsAPI = express.Router()
 // base.use('/questions', questionsAPI)
 // questionsAPI.use('/', questionsController)
 
 base.route('/questions').
-    get((req,res)=>{
-        res.json({
-             message: 'GET request successfulll!!!!'
-        })
-    })
+    get(qm.getAll)
+    
+base.route('/question')
+    .get(qm.getQuestion)
 
-
+base.route('/user')
+    .post(um.login)
+    
+base.route('/user/submit')
+    .post(um.submit)
 // app.route('/api/answer')
 //     // GET endpoint 
 //     .get((req, res) => {
@@ -51,6 +55,6 @@ app.get('/', (req, res) => {
     res.send('Hello World, from express');
 });
 // app.use(bundler.middleware());
-app.listen(8001, ()=>{
-    console.log("8001")
+app.listen(8080, ()=>{
+    console.log("8080")
 });
