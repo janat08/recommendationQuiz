@@ -103,6 +103,18 @@ function getQuestion() {
     })
 }
 
+function flattenQuestions(questions){
+    return R.flatten((R.map(R.values, R.values(questions))))
+}
+
+function submitFormat({scores, totalScore, questions}){
+    const all = flattenQuestions(questions)
+    const totalAnswered = all.filter(x=>x.answer != null).length
+    const complete = (all.length - totalAnswered) == 0
+    const data = {totalScore: toJS(totalScore), scores: toJS(scores), questions: toJS(questions), totalAnswered: totalAnswered, complete: complete}
+    return data
+}
+
 function createStore() {
     const a = observable({
         name: "",
@@ -130,7 +142,7 @@ function createStore() {
             }, this.questions)
         },
         get scoresTotal() {
-            const a = score(R.flatten((R.map(R.values, R.values(this.questions)))))
+            const a = score(flattenQuestions(this.questions))
             return a
         },
         answer(key, diff, ind) {
@@ -141,9 +153,9 @@ function createStore() {
                 this.questions[key][diff][ind].isRight = val == tar.Solution
             }
         },
-        get topics() {
-            return R.groupWith(R.equals, this.questions.map(x => x.Topic))
-        }
+        // get topics() {
+        //     return R.groupWith(R.equals, this.questions.map(x => x.Topic))
+        // }
     })
     //fetch more questions if grade is bad for a topic
     autorun((() => {

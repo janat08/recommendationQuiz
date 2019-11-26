@@ -3,12 +3,12 @@ const db = dba.db
 const merge = require('deepmerge')
 var aql = require('arangojs').aql;
 
-function getAll (){
+function getAllQ (){
     return db.query(`
 FOR q IN questions 
     SORT RAND()
     LET answers = (FOR a, o IN OUTBOUND q options
-        RETURN MERGE(KEEP(a, "key", 'value'), KEEP(o, 'right'))
+        RETURN MERGE(KEEP(a, "key", "value", "_id"), KEEP(o, 'right'))
     )
     LET res = MERGE(q, {answers: answers})
     COLLECT diff = q.Difficulty,
@@ -21,6 +21,10 @@ FOR q IN questions
         }, {})
     }).catch(console.log)
 }
+
+exports.getAllQ = getAllQ
+
+ getAllQ().then(x=>console.log(x.CNN[3][0]))
 
 function getOne({topic, difficulty}){
         return db.query(aql`
@@ -44,7 +48,7 @@ FOR q IN questions
 
 exports.getAll = async (req, res, next) => {
     try {
-        const question = await getAll();
+        const question = await getAllQ();
         res.status(200).json({
             success: true,
             data: question
