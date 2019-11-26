@@ -10,7 +10,7 @@ import * as R from 'ramda'
 //   }
 // }
 const lg = console.log
-
+window.js = toJS
 const storeContext = React.createContext(null)
 
 export const StoreProvider = ({ children }) => {
@@ -73,15 +73,20 @@ function score(ans) {
     return isNaN(res) ? 100 : res * 100
 }
 
-function addFields(x){ 
-    x.answer = null; x.isRight = false; 
-    return x 
+function addFields(x) {
+    x.answer = null; x.isRight = false;
+    return x
 
 }
 
 function formatQuestions(questions) {
     const a = questions.map(addFields)
-    return R.groupBy((x => x.Topic), a)
+    const { groupBy, prop, map } = R
+    return R.pipe(
+        groupBy(prop('Topic')),
+        map(groupBy(prop('Difficulty')))
+    )(a)
+    // return R.groupBy((x => R.groupBy((x => x.Topic), a)), a)
 }
 
 function getQuestion() {
@@ -104,24 +109,28 @@ function createStore() {
         questions: formatQuestions(questions),
         get scores() {
             return R.mapObjIndexed((val, key, obj) => {
-                return score(val)
+                return R.mapObjIndexed((valx, diff, obj) => {
+                    return score(valx)
+                }, this.questions[key])
             }, this.questions)
         },
         get answered() {
             return R.mapObjIndexed((val, key, obj) => {
-                return val.filter(x => x.answer != null).length
+                return R.mapObjIndexed((valx, diff, obj) => {
+                    return valx.filter(x => x.answer != null).length
+                }, this.questions[key])
             }, this.questions)
         },
         get scoresTotal() {
-            const a = score(R.flatten(R.values(this.questions)))
+            const a = score(R.flatten((R.map(R.values, R.values(this.questions)))))
             return a
         },
-        answer(key, ind) {
+        answer(key, diff, ind) {
             return (e) => {
                 const val = e.currentTarget.value
-                const tar = this.questions[key][ind]
-                this.questions[key][ind].answer = val
-                this.questions[key][ind].isRight = val == tar.Solution
+                const tar = this.questions[key][diff][ind]
+                this.questions[key][diff][ind].answer = val
+                this.questions[key][diff][ind].isRight = val == tar.Solution
             }
         },
         get topics() {
@@ -131,27 +140,58 @@ function createStore() {
     //fetch more questions if grade is bad for a topic
     autorun((() => {
         R.mapObjIndexed((val, key, obj) => {
-            if (a.answered[key] > 1 && a.answered[key] == a.questions[key].length) {
-                if (val < 80){
-                    getQuestion().then(x=>{
-                        a.questions[key].push(x)
-                    })
+            R.mapObjIndexed((val, diff, obj) => {
+                if (a.answered[key][diff] > 1 && a.answered[key][diff] == a.questions[key][diff].length) {
+                    if (val < 80) {
+                        getQuestion().then(x => {
+                            a.questions[key][diff].push(x)
+                        })
+                    }
                 }
-            }
+            }, val)
         }, a.scores)
     }))
     window.a = a
     return a
 }
-
+window.R = R
 const App = observer(() => {
     const store = useStore()
+    R.flatten(R.values(R.mapObjIndexed((val, key, obj) => {
+        return R.values(R.mapObjIndexed((val, diff, obj) => {
+            return
+        }, val))
+    }, store.questions)))
     return (
         <>
             <input onChange={store.setName} value={store.name}></input>
             <button onClick={store.login}>{store.loginStatus ? "Log off" : "Log In"}</button>
             {store.scoresTotal}
-            {R.values(R.mapObjIndexed((val, key, obj) => {
+            {R.flatten(R.values(R.mapObjIndexed((val, key, obj) => {
+                return R.values(R.mapObjIndexed((val, diff, obj) => {
+                    return val.map((x, i) => {
+                        const onChange = store.answer(key,diff, i)
+                        const answered = x.answer != null
+                        return (
+                            <div key={x.QN}>
+                                {x.Topic} {x.Difficulty}: {x.QN}
+                                {x.answers.map((y, yi) => {
+                                    const checked = y.key == x.answer
+                                    const wrong = x.Solution != y.key
+                                    return (
+                                        <div key={y.key}>
+                                            <input type="radio" disabled={answered} value={y.key} onChange={onChange} checked={checked} />
+                                            <label>{answered && checked ? store.scores[key][diff] + (wrong ? " Wrong: " : " Right: ") : ""}{y.value}</label>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        )
+                    })
+                }, val))
+            }, store.questions)))
+            }
+            {/* {R.values(R.mapObjIndexed((val, key, obj) => {
                 return val.map((x, i) => {
                     const onChange = store.answer(key, i)
                     const answered = x.answer != null
@@ -173,7 +213,7 @@ const App = observer(() => {
                     )
                 })
             }, store.questions))
-            }
+            } */}
         </>
     )
 })
