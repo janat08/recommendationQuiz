@@ -4,11 +4,19 @@ import { useLocalStore, observer, } from "mobx-react-lite"
 import sample from '../server/sample.json'
 import { observable, toJS, autorun } from 'mobx';
 import * as R from 'ramda'
-// class HelloMessage extends Nerv.Component {
-//   render() {
-//     return <div>Hello {this.props.name}</div>
-//   }
-// }
+import axios from 'axios'
+
+// const api = axios.create({
+//   baseURL: 'https://5000-eb57867e-a92e-4e43-8e30-e81091be5ca0.ws-ap01.gitpod.io/',
+//   timeout: 1000,
+// });
+const api = axios.create({
+  baseURL: 'https://5000-eb57867e-a92e-4e43-8e30-e81091be5ca0.ws-ap01.gitpod.io/',
+  timeout: 1000,
+});
+api.get('/api/v1/questions').then(x=>{lg(123, x)})
+
+
 const lg = console.log
 window.js = toJS
 const storeContext = React.createContext(null)
