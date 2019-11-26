@@ -1,21 +1,8 @@
 var arangojs = require("arangojs");
+var aql = require('arangojs').aql;
 var sample = require("./sample.json") //http://beautifytools.com/excel-to-json-converter.php
 var db = new arangojs.Database({ url: "http://localhost:8529" });
 var now = Date.now();
-
-db.query({
-        query: "RETURN @value",
-        bindVars: { value: now }
-    })
-    .then(function(cursor) {
-        console.log('no error')
-        return cursor.next().then(function(result) {
-            console.log(result)
-        });
-    })
-    .catch(function(err) {
-        console.log("err", err.port, err.code, err.syscall)
-    });
 
 db.createDatabase('quiz').then(
     () => console.log('Database created'),
@@ -44,6 +31,51 @@ function create(x) {
     )
 }
 
+var mapped = sample.Sheet1.map(x => {
+    const mapped = { answers: [], Topic: x.Topic, QN: x.QN, Solution: x.Solution, Difficulty: x.Difficulty }
+    for (let key in x) {
+        const val = x[key]
+        if (key.length == 1) {
+            mapped.answers.push({
+                key: key,
+                value: val,
+                right: key == x.Solution
+            })
+        }
+    }
+    return mapped
+})
+console.log(mapped[0])
+db.query('FOR d in answers return d').then(x => x.all()).then(x => {
+    if (x.length == 0) {
+        console.log('creating')
+        db.query(aql `
+  let sample = ${mapped}
+  FOR s IN sample
+    INSERT UNSET(s, answers) INTO questions
+    LET question = NEW
+    FOR a IN question.answers
+        INSERT a INTO answers
+        LET answer = NEW
+        INSERT {_from: question._id, _to: answer._id, right: a.right} INTO options
+    return question._key
+    
+`).then(
+            cursor => cursor.map(doc => doc._key)
+        ).then(
+            keys => console.log('Inserted documents:', keys.join(', ')),
+            err => {
+                console.log(err.response.body)
+            }
+        );
+    }
+    else {
+        console.log("not creating", x)
+    }
+
+})
+
+exports.db = db
 exports.selections = selections
 exports.options = options
 exports.users = users
