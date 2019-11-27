@@ -135,7 +135,7 @@ const sample2 = {
 // }
 
 
-function submit({ name, data }) {
+function submit({ user, data }) {
     const answers = []
     R.mapObjIndexed((val, key, obj) => {
         return R.mapObjIndexed((valx, diff, obj) => {
@@ -145,20 +145,20 @@ function submit({ name, data }) {
             })
         }, val)
     }, data.questions)
+    console.log(123, answers)
     return db.query(aql`
     FOR q IN ${answers}
     
     INSERT {
-        from: ${name._id},
+        from: ${user._id},
         _to: q.answers[0]._id,
         score: q.score,
         scoreTotal: ${data.scoreTotal},
         complete: ${data.complete},
     } INTO selections
-        
-    RETURN {[topic]: {[diff]: SLICE(tdq[*].res, 0, 4)}}
-    `).then(x => x.all())
-    .catch(console.log)
+    RETURN NEW
+    `).then(x => x.all()).then(x=>{console.log(222, x)})
+    .catch(x=>console.log(x.body))
 }
 
 // sampleSubmit().then(data => {
@@ -166,47 +166,49 @@ function submit({ name, data }) {
 // })
 
 function fetchQuestions(user) {
+    console.log(user)
     return db.query(aql `
     LET u = ${user}
     FOR a, s IN OUTBOUND u selections
         FILTER s.complete == false
         FOR q IN INBOUND a options
         RETURN q
-    RETURN q
     `)
     .then(x => x.all())
     .then(x=>{
+        console.log("loginquestions", x)
         return getAllQ(x)
-    })
+    }).catch(console.log)
 
 }
 
 function login({ name }) {
-    return db.query(aql `
-    UPSERT {name: ${name}}
-    INSERT {name: ${name}}
-    UPDATE {name: ${name}} in users
+    console.log(321, name)
+    return db.query(aql`
+    LET name = ${name}
+    UPSERT {name: name}
+    INSERT {name: name}
+    UPDATE {} in users
     RETURN NEW
     `)
-        .then(x => x.all()[0])
+        .then(x => x.all().then(x=>x[0]))
         .then(x => {
             return fetchQuestions(x).then(y => {
                 return { user: x, questions: y }
             })
-            return x
         })
-        .catch(console.log)
+        .catch(x=>{console.log(x.body)})
 }
 
-// login({ name: "asdfs" }).then(console.log)
+// login({ name: "asds" }).then(x=>{console.log('res', x)})
 
 
 exports.submit = async(req, res, next) => {
     try {
-        const question = await submit(req);
+        const res = await submit(req.body);
+        console.log(333, res)
         res.status(200).json({
-            success: true,
-            data: question
+            ...res
         });
     }
     catch (err) {
@@ -221,10 +223,9 @@ exports.submit = async(req, res, next) => {
 // // @route GET /api/v1/questions/:id
 exports.login = async(req, res, next) => {
     try {
-        const question = await login(req.query)
+        const question = await login(req.body)
         res.status(200).json({
-            success: true,
-            data: question
+            ...question
         });
     }
     catch (err) {

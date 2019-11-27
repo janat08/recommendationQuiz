@@ -6,15 +6,23 @@ import { observable, toJS, autorun } from 'mobx';
 import * as R from 'ramda'
 import axios from 'axios'
 
+// 54.255.185.213
+
 // const api = axios.create({
 //   baseURL: 'https://5000-eb57867e-a92e-4e43-8e30-e81091be5ca0.ws-ap01.gitpod.io/',
 //   timeout: 1000,
 // });
-const api = axios.create({
-  baseURL: 'https://2837e08ce73d4a049684366fca45d198.vfs.cloud9.ap-southeast-1.amazonaws.com:8081/',
-  timeout: 1000,
+let api = axios.create({
+  baseURL: 'http://54.255.185.213:8081/api/v1',
+  timeout: 10000,
 });
-api.get('/api/v1/questions').then(x=>{lg(123, x)})
+api.get('/test').then(x=>{console.log("connected to aws")}).catch(x=>{
+    console.log("connecting to localhost")
+    app = axios.create({
+  baseURL: 'localhost:8081/api/v1',
+  timeout: 10000,
+});
+})
 
 
 const lg = console.log
@@ -97,9 +105,13 @@ function formatQuestions(questions) {
     // return R.groupBy((x => R.groupBy((x => x.Topic), a)), a)
 }
 
-function getQuestion() {
-    return new Promise((re) => {
-        re(addFields(questions[0]))
+function getQuestion(topic, diff) {
+    return api.get('/question', {params: {
+        topic, difficulty: diff
+    }}).then(x=>{
+        return x.data
+    }).catch(x=>{
+        console.log(x)
     })
 }
 
@@ -124,9 +136,12 @@ function createStore() {
         },
         login() {
             //http
-            if (!this.loginStatus){
-                api.post(this.name).then(x=>{
-                    console.log(x)
+            if (true || !this.loginStatus){
+                api.post("/user", {
+                    name: this.name
+                }).then(x=>{
+                    this.questions = x.data.questions
+                    this.user = x.data.user
                 })
             }
             
@@ -159,6 +174,11 @@ function createStore() {
                 this.questions[key][diff][ind].isRight = val == tar.Solution
             }
         },
+        submit(){
+            const a = submitFormat({scores: this.scores, questions: this.questions, totalScore: this.scoresTotal})
+            console.log(a)
+            api.post("/user/submit", {data: a, user: this.user})
+        }
         // get topics() {
         //     return R.groupWith(R.equals, this.questions.map(x => x.Topic))
         // }
@@ -169,7 +189,8 @@ function createStore() {
             R.mapObjIndexed((val, diff, obj) => {
                 if (a.answered[key][diff] > 1 && a.answered[key][diff] == a.questions[key][diff].length) {
                     if (val < 80) {
-                        getQuestion().then(x => {
+                        getQuestion(key, diff).then(x => {
+                            console.log(x)
                             a.questions[key][diff].push(x)
                         })
                     }
@@ -192,6 +213,7 @@ const App = observer(() => {
         <>
             <input onChange={store.setName} value={store.name}></input>
             <button onClick={store.login}>{store.loginStatus ? "Log off" : "Log In"}</button>
+            <button onClick={store.submit}>"Submit/save"</button>
             {store.scoresTotal}
             {R.flatten(R.values(R.mapObjIndexed((val, key, obj) => {
                 return R.values(R.mapObjIndexed((val, diff, obj) => {
@@ -199,7 +221,7 @@ const App = observer(() => {
                         const onChange = store.answer(key,diff, i)
                         const answered = x.answer != null
                         return (
-                            <div key={x.QN}>
+                            <div key={x.QN+x.answer+i}>
                                 {x.Topic} {x.Difficulty}: {x.QN}
                                 {x.answers.map((y, yi) => {
                                     const checked = y.key == x.answer

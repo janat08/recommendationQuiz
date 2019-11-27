@@ -53,7 +53,7 @@ base.route('/user/submit')
 // app.use('/api/v1/answers', questions)
 
 
-app.get('/', (req, res) => {
+base.get('/test', (req, res) => {
     res.send('Hello World, from express');
 });
 // app.use(bundler.middleware());

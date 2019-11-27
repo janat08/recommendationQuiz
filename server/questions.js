@@ -5,11 +5,10 @@ var aql = require('arangojs').aql;
 
 function getAllQ (questionsList){
     let directSearch = true
-    if (typeof questionsList != "undefined"){
+    if (typeof questionsList != "undefined" && questionsList.length != 0){
         directSearch = false
     }
     return db.query(aql`
-    // LET questionsList = ${directSearch}? questions : ${questionsList}
     FOR q IN  ${directSearch}? questions : ${questionsList} 
     SORT RAND()
     LET answers = (FOR a, o IN OUTBOUND q options
@@ -29,7 +28,7 @@ function getAllQ (questionsList){
 
 exports.getAllQ = getAllQ
 
- getAllQ().then(x=>console.log(x.CNN[3][0]))
+//  getAllQ().then(x=>console.log(x.CNN[3][0]))
 
 function getOne({topic, difficulty}){
         return db.query(aql`
@@ -47,7 +46,7 @@ FOR q IN questions
     .then(x=>{
         return x[0]
     })
-    .catch(console.log)
+    .catch(x=>console.log(x.body))
 }
 
 
@@ -55,8 +54,7 @@ exports.getAll = async (req, res, next) => {
     try {
         const question = await getAllQ();
         res.status(200).json({
-            success: true,
-            data: question
+            question
         });
     } catch (err) {
         res.status(400).json({
@@ -72,8 +70,7 @@ exports.getQuestion = async (req, res, next) => {
     try {
         const question = await getOne(req.query)
         res.status(200).json({
-            success: true,
-            data: question
+            ...question
         });
     } catch (err) {
         res.status(400).json({
