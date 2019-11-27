@@ -174,10 +174,29 @@ function createStore() {
                 this.questions[key][diff][ind].isRight = val == tar.Solution
             }
         },
+        submitDisable: false,
         submit(){
+            this.submitDisable = true
             const a = submitFormat({scores: this.scores, questions: this.questions, totalScore: this.scoresTotal})
             console.log(a)
-            api.post("/user/submit", {data: a, user: this.user})
+            api.post("/user/submit", {data: a, user: this.user}).then(x=>{
+                x.questions = []
+                x.user = null
+                x.name = ""
+                this.submitDisable = false
+            }).catch(x=>{
+                this.submitDisable = false
+                window.alert("error")
+            })
+        },
+        testAnswerAllCorrectly(){
+            return R.mapObjIndexed((val, key, obj) => {
+                return R.mapObjIndexed((valx, diff, obj) => {
+                     this.questions[key][diff].map((x,i)=>{
+                        this.questions[key][diff][i].answer = this.questions[key][diff][i].Solution
+                     })
+                }, this.questions[key])
+            }, this.questions)
         }
         // get topics() {
         //     return R.groupWith(R.equals, this.questions.map(x => x.Topic))
@@ -212,8 +231,8 @@ const App = observer(() => {
     return (
         <>
             <input onChange={store.setName} value={store.name}></input>
-            <button onClick={store.login}>{store.loginStatus ? "Log off" : "Log In"}</button>
-            <button onClick={store.submit}>"Submit/save"</button>
+            <button onClick={store.login}>"Log In/will reset"</button>
+            <button onClick={store.submit} disabled={store.submitDisable}>"Submit/save/logout"</button>
             {store.scoresTotal}
             {R.flatten(R.values(R.mapObjIndexed((val, key, obj) => {
                 return R.values(R.mapObjIndexed((val, diff, obj) => {

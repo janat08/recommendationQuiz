@@ -136,29 +136,48 @@ const sample2 = {
 
 
 function submit({ user, data }) {
+    const completed = data.complete
+    if (completed == false){
+        console.log("incomplete", user._id)
+        return db.query(aql`
+            UPDATE ${user._key} WITH {
+                incompleteTest : ${data}
+            } IN users
+        RETURN NEW
+        `).then(x => x.all()).then(x=>{console.log(222, x)}).catch(x=>{console.log(x.response.body)})
+    } else {
+        db.query(aql`
+            UPDATE ${user._key} WITH {
+                incompleteTest: null
+            } IN users
+        RETURN NEW`)
+    }
+    console.log("submitting")
     const answers = []
     R.mapObjIndexed((val, key, obj) => {
         return R.mapObjIndexed((valx, diff, obj) => {
-            return valx.filter(x=>x.answer).forEach((x, i) => {
-                answers.push({...x, score: data.scores[key][diff], answers: x.answers.filter(y=>y.key == x.answer)[0]})
+            return valx.forEach((x, i) => {
+                answers.push({...x, score: data.scores[key][diff], answerSelected: x.answers.filter(y=>y.key == x.answer)[0]})
                 // answers.push(x)
             })
         }, val)
     }, data.questions)
-    console.log(123, answers)
+    console.log("constructed")
+    console.log("answer", data.questions, data.totalAnswered)
     return db.query(aql`
-    FOR q IN ${answers}
-    
+    LET answers = ${answers}
+    FOR q IN answers
     INSERT {
-        from: ${user._id},
-        _to: q.answers[0]._id,
+        _from: ${user._id},
+        _to: q.answerSelected._id,
         score: q.score,
-        scoreTotal: ${data.scoreTotal},
-        complete: ${data.complete},
+        totalAnswered: ${data.totalAnswered},
+        totalScore: ${data.totalScore},
+        complete: ${completed}
     } INTO selections
     RETURN NEW
     `).then(x => x.all()).then(x=>{console.log(222, x)})
-    .catch(x=>console.log(x.body))
+    .catch(x=>console.log("submit err",x.response.body))
 }
 
 // sampleSubmit().then(data => {
@@ -166,24 +185,26 @@ function submit({ user, data }) {
 // })
 
 function fetchQuestions(user) {
-    console.log(user)
-    return db.query(aql `
-    LET u = ${user}
-    FOR a, s IN OUTBOUND u selections
-        FILTER s.complete == false
-        FOR q IN INBOUND a options
-        RETURN q
-    `)
-    .then(x => x.all())
-    .then(x=>{
-        console.log("loginquestions", x)
-        return getAllQ(x)
-    }).catch(console.log)
-
+    return user.incompleteTest? new Promise(x=>x(user.incompleteTest.questions)) : getAllQ()
+    //USERFUL FOR FETCHING QUESTIONS/ANSWERS, ISN'T COMPLETE///////////
+    // console.log(user)
+    // return db.query(aql `
+    // LET u = ${user}
+    
+    // FOR a, s IN OUTBOUND u selections
+    //     FILTER s.complete == false
+    //     FOR q IN INBOUND a options
+    // RETURN q
+    // `)
+    // .then(x => x.all())
+    // .then(x=>{
+    //     console.log("loginquestions", x)
+    //     return getAllQ(x)
+    // }).catch(x=>console.log('fetchQuestions', x.body))
 }
-
+login({name: "test"})
+// getAllQ().then(x=>console.log(x))
 function login({ name }) {
-    console.log(321, name)
     return db.query(aql`
     LET name = ${name}
     UPSERT {name: name}
@@ -193,7 +214,10 @@ function login({ name }) {
     `)
         .then(x => x.all().then(x=>x[0]))
         .then(x => {
+            console.log('user', x)
+
             return fetchQuestions(x).then(y => {
+                console.log('res', y)
                 return { user: x, questions: y }
             })
         })
@@ -205,13 +229,15 @@ function login({ name }) {
 
 exports.submit = async(req, res, next) => {
     try {
-        const res = await submit(req.body);
-        console.log(333, res)
-        res.status(200).json({
-            ...res
+        console.log("submit")
+        const result = await submit(req.body);
+        console.log(333, typeof res, typeof req, typeof next)
+        res.send({
+            ...result
         });
     }
     catch (err) {
+        console.log("error", err, "error")
         res.status(400).json({
             success: false
         });

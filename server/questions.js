@@ -4,12 +4,12 @@ const merge = require('deepmerge')
 var aql = require('arangojs').aql;
 
 function getAllQ (questionsList){
-    let directSearch = true
     if (typeof questionsList != "undefined" && questionsList.length != 0){
-        directSearch = false
+        questionsList = 'questions'
     }
+    
     return db.query(aql`
-    FOR q IN  ${directSearch}? questions : ${questionsList} 
+    FOR q IN questions
     SORT RAND()
     LET answers = (FOR a, o IN OUTBOUND q options
         RETURN MERGE(KEEP(a, "key", "value", "_id"), KEEP(o, 'right'))
@@ -23,7 +23,7 @@ function getAllQ (questionsList){
         return x.reduce((a,x)=>{
             return merge(a, {[Object.keys(x)[0]]: Object.values(x)[0]})
         }, {})
-    }).catch(console.log)
+    }).catch(x=>{console.log("getallq",x.response.body)})
 }
 
 exports.getAllQ = getAllQ
