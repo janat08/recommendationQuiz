@@ -110,14 +110,16 @@ function fetchByTopic(user){
     return db.query(aql `
     LET u = ${user}
     
-    FOR s, a IN OUTBOUND u selections
-        FOR q IN INBOUND s options
-    RETURN {s, a, q}
+    FOR a, stats IN OUTBOUND u selections
+        FOR question IN INBOUND a options
+        COLLECT diff = question.Topic INTO tdq
+        LET rest = (FOR qx IN tdq[*] return UNSET(qx, "a"))
+
+    RETURN {[diff]: {questions: rest, score: rest[0].stats.score}}
     `)
     .then(x => x.all())
     .then(x=>{
-        console.log("by topic", x[0])
-        // return getAllQ(x)
+        return console.log(x)
     }).catch(x=>console.log('by topic', x.body))
 }
 

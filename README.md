@@ -32,3 +32,5 @@ There's arangodb web interface (don't remember the port).
 
 When saving incomplete quiz, it will not be stored in graph, because of the way graph is set up (user's answers have a relation straight to the answer document, and not the question document).
 
+fetchByTopic function in users, that fetches questions, answers, and scores by topic.
+if you'd like to see this for all users, just map over users array passing in that function.
