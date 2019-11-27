@@ -18,3 +18,5 @@ questions: Solution, QN, etc...
 
 Therere some functions for flattening and deflattening questions out of array and into object.object.array on client side.
 I considered flattening and deflattening the state on client side, and keeping everything flat on server a little late
+
+When saving incomplete quiz, it will not be stored in graph, because of the way graph is set up (user's answers have a relation straight to the answer document, and not the question document).
