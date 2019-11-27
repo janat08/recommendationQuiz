@@ -26,6 +26,6 @@ Instead of tracking current difficulty entire incomplete test is served
 
 db.js contains scripts for seeding the database, they erase all documents, and reinsert them.
 all users answers will be lost. You can still just insert questions, but the script doesn't
-check for duplicates before inserting.
+check for duplicates before inserting. There's link in that file for converting excel data to json.
 
 There's arangodb web interface (don't remember the port).
