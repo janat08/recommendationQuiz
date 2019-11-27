@@ -19,7 +19,6 @@ questions: Solution, QN, etc...
 Therere some functions for flattening and deflattening questions out of array and into object.object.array on client side.
 I considered flattening and deflattening the state on client side, and keeping everything flat on server a little late
 
-<<<<<<< HEAD
 Set of questions belonging to specific test are tracked with testCount.
 
 Instead of tracking current difficulty entire incomplete test is served 
@@ -30,6 +29,6 @@ all users answers will be lost. You can still just insert questions, but the scr
 check for duplicates before inserting. There's link in that file for converting excel data to json.
 
 There's arangodb web interface (don't remember the port).
-=======
+
 When saving incomplete quiz, it will not be stored in graph, because of the way graph is set up (user's answers have a relation straight to the answer document, and not the question document).
->>>>>>> 5d324f3fb546a32cdc3fe46cb0d0f5d84bd00219
+
