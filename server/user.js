@@ -112,26 +112,22 @@ function fetchByTopic(user){
     
     FOR a, stats IN OUTBOUND u selections
         FOR question IN INBOUND a options
-        COLLECT diff = question.Topic INTO tdq
-        LET rest = (FOR qx IN tdq[*] return UNSET(qx, "a"))
-
-    RETURN {[diff]: {questions: rest, score: rest[0].stats.score}}
+        COLLECT tSet = stats.testCount INTO sets
+        LET rest = (FOR qx IN sets[*] 
+                        COLLECT topic = qx.question.Topic INTO topics
+                        LET unkept = (FOR b in topics[*] RETURN UNSET(b.qx, "a"))
+                    RETURN {[topic]: unkept, score: unkept[0].stats.score}
+                    )
+    RETURN {set: tSet, results: rest}
+    // RETURN {[tSet]: {[topic]: {questions: rest, score: rest[0].stats.score}}}
     `)
     .then(x => x.all())
     .then(x=>{
-        return console.log(x)
-    }).catch(x=>console.log('by topic', x.body))
+        return x
+        // return console.log(JSON.stringify(x).substr(0, 500))
+        // return console.log(x[0].results[0])
+    }).catch(x=>console.log('by topic', x.response.body))
 }
-
-fetchByTopic({
-  "_key": "51078",
-  "_id": "users/51078",
-  "_rev": "_ZowHEiS--_",
-  "name": "a",
-  "testCount": 1,
-  "incompleteTest": null
-})
-
 
 function login({ name }) {
     console.log(name)
