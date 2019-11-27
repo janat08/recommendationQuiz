@@ -59,20 +59,19 @@ const sample = {
 function submit({ user, data }) {
     const completed = data.complete
     if (completed == false){
-        console.log("incomplete", user._id)
         return db.query(aql`
             UPDATE ${user._key} WITH {
                 incompleteTest : ${data}
             } IN users
         RETURN NEW
-        `).then(x => x.all()).then(x=>{console.log(222, x)}).catch(x=>{console.log(x.response.body)})
+        `).then(x => x.all()).catch(x=>{console.log(x.response.body)})
     } else {
         db.query(aql`
             UPDATE ${user._key} WITH {
-                incompleteTest: null
+                incompleteTest: null,
                 testCount: ${user.testCount+1}
             } IN users
-        RETURN NEW`)
+        RETURN NEW`).then(x => x.all()).catch(x=>{console.log(x.response.body)})
     }
     console.log("submitting")
     const answers = []
@@ -85,7 +84,7 @@ function submit({ user, data }) {
         }, val)
     }, data.questions)
     console.log("constructed")
-    console.log("answer", data.questions, data.totalAnswered)
+    console.log("answer", user)
     return db.query(aql`
     LET answers = ${answers}
     FOR q IN answers
@@ -99,37 +98,47 @@ function submit({ user, data }) {
         testCount: ${user.testCount}
     } INTO selections
     RETURN NEW
-    `).then(x => x.all()).then(x=>{console.log(222, x)})
+    `).then(x => x.all()).then(x=>{console.log(222, x[0])})
     .catch(x=>console.log("submit err",x.response.body))
 }
 
 function fetchQuestions(user) {
     return user.incompleteTest? new Promise(x=>x(user.incompleteTest.questions)) : getAllQ()
-    //USERFUL FOR FETCHING QUESTIONS/ANSWERS, ISN'T COMPLETE///////////
-    // console.log(user)
-    // return db.query(aql `
-    // LET u = ${user}
-    
-    // FOR a, s IN OUTBOUND u selections
-    //     FILTER s.complete == false
-    //     FOR q IN INBOUND a options
-    // RETURN q
-    // `)
-    // .then(x => x.all())
-    // .then(x=>{
-    //     console.log("loginquestions", x)
-    //     return getAllQ(x)
-    // }).catch(x=>console.log('fetchQuestions', x.body))
 }
+
+function fetchByTopic(user){
+    return db.query(aql `
+    LET u = ${user}
+    
+    FOR s, a IN OUTBOUND u selections
+        FOR q IN INBOUND s options
+    RETURN {s, a, q}
+    `)
+    .then(x => x.all())
+    .then(x=>{
+        console.log("by topic", x[0])
+        // return getAllQ(x)
+    }).catch(x=>console.log('by topic', x.body))
+}
+
+fetchByTopic({
+  "_key": "51078",
+  "_id": "users/51078",
+  "_rev": "_ZowHEiS--_",
+  "name": "a",
+  "testCount": 1,
+  "incompleteTest": null
+})
 
 
 function login({ name }) {
+    console.log(name)
     return db.query(aql`
     LET name = ${name}
     UPSERT {name: name}
     INSERT {
         name: name,
-        testCount: 0,
+        testCount: 0
     }
     UPDATE {} in users
     RETURN NEW
@@ -141,9 +150,9 @@ function login({ name }) {
             return fetchQuestions(x).then(y => {
                 console.log('res', y)
                 return { user: x, questions: y }
-            })
+            }).catch(console.log)
         })
-        .catch(x=>{console.log(x.body)})
+        .catch(x=>{console.log(x.response.body)})
 }
 
 

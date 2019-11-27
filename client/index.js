@@ -112,22 +112,20 @@ function submitFormat({scores, totalScore, questions}){
 function createStore() {
     const a = observable({
         name: "",
-        loginStatus: false,
         setName(ev) {
             this.name = ev.target.value
         },
         login() {
             //http
-            if (true || !this.loginStatus){
+
                 api.post("/user", {
                     name: this.name
                 }).then(x=>{
                     this.questions = x.data.questions
                     this.user = x.data.user
+                    console.log(x)
                 })
-            }
             
-            this.loginStatus = !this.loginStatus
         },
         questions: formatQuestions(questions),
         get scores() {
