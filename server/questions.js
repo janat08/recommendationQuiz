@@ -64,8 +64,6 @@ exports.getAll = async (req, res, next) => {
 };
 
 
-// // @desc Get single question
-// // @route GET /api/v1/questions/:id
 exports.getQuestion = async (req, res, next) => {
     try {
         const question = await getOne(req.query)
@@ -79,46 +77,20 @@ exports.getQuestion = async (req, res, next) => {
     }
 };
 
-// // @desc Update a question
-// // @route PUT /api/v1/questions/:id
-// exports.updateQuestion = async (req, res, next) => {
-//     try {
-//         const question = await Question.findByIdAndUpdate(req.params.id, req.body);
 
-//         if (!question) {
-//             return res.status(400).json({
-//                 success: false
-//             });
-//         }
-//         res.status(200).json({
-//             success: true,
-//             data: question
-//         });
-//     } catch (err) {
-//         res.status(400).json({
-//             success: false
-//         });
-//     }
-// };
+exports.create = function(){
+    
+}
 
-// // @desc Delete a question
-// // @route DELETE /api/v1/questions/:id
-// exports.deleteQuestion = async (req, res, next) => {
-//     try {
-//         const question = await Question.findByIdAndDelete(req.params.id);
-
-//         if (!question) {
-//             return res.status(400).json({
-//                 success: false
-//             });
-//         }
-//         res.status(200).json({
-//             success: true,
-//             data: question
-//         });
-//     } catch (err) {
-//         res.status(400).json({
-//             success: false
-//         });
-//     }
-// };
+exports.createQuestion = async (req,res,next)=>{
+    try {
+                const question = await create(req.query)
+        res.status(200).json({
+            ...question
+        });
+    } catch (err){
+                res.status(400).json({
+            success: false
+        });
+    }
+}

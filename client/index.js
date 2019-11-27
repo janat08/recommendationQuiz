@@ -53,24 +53,6 @@ const questions = [
     //     { key: "D", value: "All of the above", }],
     //     "Solution": "D",
     //     "Difficulty": "3"
-    // }, {
-    //     "Topic": "CNN",
-    //     "QN": "a of the following statements is true when you use 1×1 convolutions in a CNN?",
-    //     answers: [{ key: "A", value: "It can help in dimensionality reduction" },
-    //     { key: "B", value: "It can be used for feature pooling" },
-    //     { key: "C", value: "It suffers less overfitting due to small kernel size" },
-    //     { key: "D", value: "All of the above", }],
-    //     "Solution": "D",
-    //     "Difficulty": "3"
-    // }, {
-    //     "Topic": "ABC",
-    //     "QN": "s of the following statements is true when you use 1×1 convolutions in a CNN?",
-    //     answers: [{ key: "A", value: "It can help in dimensionality reduction" },
-    //     { key: "B", value: "It can be used for feature pooling" },
-    //     { key: "C", value: "It suffers less overfitting due to small kernel size" },
-    //     { key: "D", value: "All of the above", }],
-    //     "Solution": "D",
-    //     "Difficulty": "3"
     // },
 ]
 
@@ -162,9 +144,16 @@ function createStore() {
                 }, this.questions[key])
             }, this.questions)
         },
+        get flattened(){
+          return flattenQuestions(this.questions)  
+        },
         get scoresTotal() {
-            const a = score(flattenQuestions(this.questions))
+            const a = score(this.flattened)
             return a
+        },
+        get completed(){
+            const totalAnswered = this.flattened.filter(x=>x.answer != null).length
+            return {count: this.flattened.length, answered: totalAnswered}
         },
         answer(key, diff, ind) {
             return (e) => {
@@ -178,11 +167,10 @@ function createStore() {
         submit(){
             this.submitDisable = true
             const a = submitFormat({scores: this.scores, questions: this.questions, totalScore: this.scoresTotal})
-            console.log(a)
             api.post("/user/submit", {data: a, user: this.user}).then(x=>{
-                x.questions = []
-                x.user = null
-                x.name = ""
+                this.questions = []
+                this.user = null
+                this.name = ""
                 this.submitDisable = false
             }).catch(x=>{
                 this.submitDisable = false
@@ -233,7 +221,7 @@ const App = observer(() => {
             <input onChange={store.setName} value={store.name}></input>
             <button onClick={store.login}>"Log In/will reset"</button>
             <button onClick={store.submit} disabled={store.submitDisable}>"Submit/save/logout"</button>
-            {store.scoresTotal}
+            {store.scoresTotal}% Right, {store.completed.answered}/{store.completed.count} answered
             {R.flatten(R.values(R.mapObjIndexed((val, key, obj) => {
                 return R.values(R.mapObjIndexed((val, diff, obj) => {
                     return val.map((x, i) => {
